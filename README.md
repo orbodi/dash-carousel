@@ -24,7 +24,7 @@ Dash Carousel se charge de se connecter automatiquement à vos applications, d�
 
 📦 Installation
 1. Cloner le repo
-git clone https://github.com/ton-compte/dash-carousel.git
+git clone https://github.com/orbodi/dash-carousel.git
 cd dash-carousel
 
 2. Installer les dépendances
