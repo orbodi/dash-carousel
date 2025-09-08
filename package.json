@@ -1,0 +1,23 @@
+{
+  "name": "scroll-app",
+  "version": "1.0.0",
+  "bin": "scroll.js",
+  "scripts": {
+    "start": "node scroll.js"
+  },
+  "dependencies": {
+    "selenium-webdriver": "^4.35.0"
+  },
+  "devDependencies": {
+    "chromedriver": "^139.0.2"
+  },
+  "pkg": {
+    "assets": [
+      "node_modules/chromedriver/lib/chromedriver/chromedriver.exe"
+    ],
+    "targets": [
+      "node18-win-x64"
+    ]
+  }
+}
+
