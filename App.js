@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+require('dotenv').config();
+
 // App.js
 const { Builder, By, until } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
@@ -9,8 +11,8 @@ const DISPLAY_TIME = 60000; // temps d'affichage par onglet (ms)
 const SCROLL_STEP = 300;    // pixels par scroll
 const SCROLL_INTERVAL = 10000; // intervalle entre deux scrolls (ms)
 
-const dashboards = [
 
+const dashboards = [
     {
         name: 'Solar',
         url: 'https://monitor.eid.local/Orion/Login.aspx?ReturnUrl=%2fOrion%2fSummaryView.aspx',
@@ -18,14 +20,12 @@ const dashboards = [
             usernameSel: By.id('ctl00_BodyContent_Username'),
             passwordSel: By.id('ctl00_BodyContent_Password'),
             submitSel:   By.id('ctl00_BodyContent_LoginButton'),
-            username: 'your-username',  // <-- remplace
-            password: 'your-password'   // <-- remplace
+            username: process.env.SOLAR_USER,
+            password: process.env.SOLAR_PASS
         },
         readyCheck: By.css('.ResourceContainer'),
         isVisibleInCarousel: true
     },
-
-
     {
         name: 'Palo',
         url: 'https://172.16.11.23/php/login.php',
@@ -33,13 +33,12 @@ const dashboards = [
             usernameSel: By.id('user'),
             passwordSel: By.id('passwd'),
             submitSel:   By.id('trLoginBtn'),
-            username: 'your-username',  // <-- remplace
-            password: 'your-password'   // <-- remplace
+            username: process.env.PALO_USER,
+            password: process.env.PALO_PASS
         },
         readyCheck: By.id('ext-gen93'),
         isVisibleInCarousel: true
     },
-
     {
         name: 'F5',
         url: 'https://172.16.11.26',
@@ -47,15 +46,14 @@ const dashboards = [
             usernameSel: By.id('username'),
             passwordSel: By.id('passwd'),
             submitSel:   By.css('button[type="submit"]'),
-            username: 'your-username',  // <-- remplace
-            password: 'your-password'   // <-- remplace
+            username: process.env.F5_USER,
+            password: process.env.F5_PASS
         },
         consentSel: By.name('.-primary'),
         linkId: By.id('mainmenu-statistics-dashboard'),
         readyCheck: By.id('panels'),
         isVisibleInCarousel: false
     },
-
     {
         name: 'F5 - Dashboard 2',
         url: 'https://172.16.11.26/tmui/tmui/dashboard/app/index.html?xui=false#/?name=ltm.js',
@@ -63,15 +61,14 @@ const dashboards = [
             usernameSel: By.id('username'),
             passwordSel: By.id('passwd'),
             submitSel:   By.css('button[type="submit"]'),
-            username: 'your-username',  // <-- remplace
-            password: 'your-password'   // <-- remplace
+            username: process.env.F5_USER,
+            password: process.env.F5_PASS
         },
         consentSel: By.name('.-primary'),
         linkId: By.id('mainmenu-statistics-dashboard'),
         readyCheck: By.id('grid'),
         isVisibleInCarousel: true
     },
-
     {
         name: 'F5 - Dashboard 1',
         url: 'https://172.16.11.26/tmui/tmui/dashboard/app/index.html?xui=false#/?name=sys.js',
@@ -79,15 +76,14 @@ const dashboards = [
             usernameSel: By.id('username'),
             passwordSel: By.id('passwd'),
             submitSel:   By.css('button[type="submit"]'),
-            username: 'your-username',  // <-- remplace
-            password: 'your-password'   // <-- remplace
+            username: process.env.F5_USER,
+            password: process.env.F5_PASS
         },
         consentSel: By.name('.-primary'),
         linkId: By.id('mainmenu-statistics-dashboard'),
         readyCheck: By.css('.canvas'),
         isVisibleInCarousel: true
     },
-
     {
         name: 'Forti',
         url: 'https://172.16.11.35/',
@@ -95,13 +91,12 @@ const dashboards = [
             usernameSel: By.name('username'),
             passwordSel: By.name('secretkey'),
             submitSel:   By.css('button[type="button"]'),
-            username: 'your-username',  // <-- remplace
-            password: 'your-password'   // <-- remplace
+            username: process.env.FORTI_USER,
+            password: process.env.FORTI_PASS
         },
         readyCheck: By.css('.module-list'),
         isVisibleInCarousel: true
     },
-
     {
         name: 'Appstra',
         url: 'https://172.16.10.5',
@@ -109,13 +104,12 @@ const dashboards = [
             usernameSel: By.id('username'),
             passwordSel: By.id('password'),
             submitSel:   By.id('login-btn'),
-            username: 'your-username',  // <-- remplace
-            password: 'your-password'   // <-- remplace
+            username: process.env.APPSTRA_USER,
+            password: process.env.APPSTRA_PASS
         },
         readyCheck: By.css('.main-content-wrapper'),
         isVisibleInCarousel: true
     },
-
     {
         name: 'Appstra',
         url: 'https://172.16.10.5/#/devices/systems',
@@ -123,13 +117,12 @@ const dashboards = [
             usernameSel: By.id('username'),
             passwordSel: By.id('password'),
             submitSel:   By.id('login-btn'),
-            username: 'your-username',  // <-- remplace
-            password: 'your-password'   // <-- remplace
+            username: process.env.APPSTRA_USER,
+            password: process.env.APPSTRA_PASS
         },
         readyCheck: By.css('.main-content-wrapper'),
         isVisibleInCarousel: true
     },
-
     {
         name: 'Appstra',
         url: 'https://172.16.10.5/#/blueprints/d0923191-4420-4319-87a0-3f0ffb441983/dashboard',
@@ -137,13 +130,12 @@ const dashboards = [
             usernameSel: By.id('username'),
             passwordSel: By.id('password'),
             submitSel:   By.id('login-btn'),
-            username: 'your-username',  // <-- remplace
-            password: 'your-password'   // <-- remplace
+            username: process.env.APPSTRA_USER,
+            password: process.env.APPSTRA_PASS
         },
         readyCheck: By.css('.main-content-wrapper'),
         isVisibleInCarousel: true
     },
-
     {
         name: 'Graylog',
         url: 'http://172.16.54.96',
@@ -151,13 +143,12 @@ const dashboards = [
             usernameSel: By.id('username'),
             passwordSel: By.id('password'),
             submitSel:   By.css('button[type="submit"]'),
-            username: 'your-username',  // <-- remplace
-            password: 'your-password'   // <-- remplace
+            username: process.env.GRAYLOG_USER,
+            password: process.env.GRAYLOG_PASS
         },
         readyCheck: By.css('.sc-fSoaGE'),
         isVisibleInCarousel: true
     },
-
     {
         name: 'DDOS',
         url: 'https://172.16.11.30',
@@ -165,15 +156,14 @@ const dashboards = [
             usernameSel: By.name('username'),
             passwordSel: By.name('password'),
             submitSel:   By.css('button[type="submit"]'),
-            username: 'your-username',  // <-- remplace
-            password: 'your-password'   // <-- remplace
+            username: process.env.DDOS_USER,
+            password: process.env.DDOS_PASS
         },
         consentSel: By.id('banner_button'),
         forceVisiblePassword: true,
         readyCheck: By.css('.page-container'),
         isVisibleInCarousel: true
     },
-
     {
         name: 'DDOS-PROTECT-GROUPS',
         url: 'https://172.16.11.30/groups/list/',
@@ -181,15 +171,14 @@ const dashboards = [
             usernameSel: By.name('username'),
             passwordSel: By.name('password'),
             submitSel:   By.css('button[type="submit"]'),
-            username: 'your-username',  // <-- remplace
-            password: 'your-password'   // <-- remplace
+            username: process.env.DDOS_USER,
+            password: process.env.DDOS_PASS
         },
         consentSel: By.id('banner_button'),
         forceVisiblePassword: true,
         readyCheck: By.css('.page-container'),
         isVisibleInCarousel: true
     },
-
     {
         name: 'LogRhythm',
         url: 'https://secudefense.eid.local/dashboard',
@@ -197,14 +186,14 @@ const dashboards = [
             usernameSel: By.id('username'),
             passwordSel: By.id('password'),
             submitSel:   By.css('button[type="submit"]'),
-            username: 'your-username',  // <-- remplace
-            password: 'your-password'   // <-- remplace
+            username: process.env.LOGRHYTHM_USER,
+            password: process.env.LOGRHYTHM_PASS
         },
         readyCheck: By.css('.page-dashboard'),
         isVisibleInCarousel: true
     }
-
 ];
+
 
 
 /** ========= UTILITAIRES ========= **/
