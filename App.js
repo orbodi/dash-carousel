@@ -404,7 +404,7 @@ async function autoScroll(driver, durationMs) {
 }
 
 /** ========= SCRIPT PRINCIPAL ========= **/
-(async function main() {
+(async function main_v1() {
   const options = new chrome.Options()
     .setAcceptInsecureCerts(true)
     .addArguments('--ignore-certificate-errors')
@@ -472,3 +472,88 @@ async function autoScroll(driver, durationMs) {
     // await driver.quit();
   }
 })();
+
+
+(async function main() {
+  const options = new chrome.Options()
+    .setAcceptInsecureCerts(true)
+    .addArguments('--ignore-certificate-errors')
+    .addArguments('--allow-insecure-localhost')
+    .addArguments('--start-maximized')
+    .addArguments('--disable-infobars')
+    .addArguments('--disable-extensions')
+    .addArguments('--start-fullscreen');
+
+  const driver = await new Builder().forBrowser('chrome').setChromeOptions(options).build();
+
+  try {
+    console.log('🚀 Lancement WebDriver...');
+
+    const tabs = [];
+
+    // --- Ouverture du premier dashboard ---
+    try {
+      await driver.get(dashboards[0].url);
+      await driver.sleep(5000);
+      await driver.executeScript('history.go(0)');
+      await ensureLoggedIn(driver, dashboards[0]);
+      tabs.push(await driver.getWindowHandle());
+    } catch (err) {
+      console.error(`❌ Échec ouverture/connexion du dashboard ${dashboards[0].name}:`, err.message);
+      tabs.push(await driver.getWindowHandle()); // quand même garder un handle
+    }
+
+    // --- Ouverture des autres dashboards ---
+    for (let i = 1; i < dashboards.length; i++) {
+      await driver.executeScript('window.open("about:blank","_blank");');
+      const handles = await driver.getAllWindowHandles();
+      const newTab = handles.find(h => !tabs.includes(h));
+      tabs.push(newTab);
+
+      await driver.switchTo().window(newTab);
+
+      try {
+        await driver.get(dashboards[i].url);
+        await ensureLoggedIn(driver, dashboards[i]);
+
+        if (dashboards[i].consentSel) {
+          await clickConsentIfAny(driver, dashboards[i].consentSel);
+        }
+
+        if (dashboards[i].linkId) {
+          await clickById(driver, dashboards[i].linkId);
+        }
+
+      } catch (err) {
+        console.error(`❌ Échec ouverture/connexion du dashboard ${dashboards[i].name}:`, err.message);
+        // continue quand même sur les autres
+      }
+    }
+
+    console.log(`✅ Tous les dashboards sont ouverts (même ceux en erreur).`);
+
+    // --- Carrousel dynamique ---
+    while (true) {
+      for (let i = 0; i < dashboards.length; i++) {
+        if (!dashboards[i].isVisibleInCarousel) continue;
+
+        try {
+          await driver.switchTo().window(tabs[i]);
+          await ensureLoggedIn(driver, dashboards[i]);
+          console.log(`➡️ Dashboard affiché : ${dashboards[i].name}`);
+          await autoScroll(driver, DISPLAY_TIME);
+        } catch (err) {
+          console.error(`⚠️ Erreur lors du rafraîchissement du dashboard ${dashboards[i].name}:`, err.message);
+          // On loggue et on passe au suivant
+        }
+      }
+    }
+
+  } catch (e) {
+    console.error('❌ Erreur principale :', e);
+  } finally {
+    // Optionnel : garder ouvert pour mur d’écran
+    // await driver.quit();
+  }
+})();
+
