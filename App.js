@@ -138,7 +138,7 @@ const dashboards = [
     },
     {
         name: 'Graylog',
-        url: 'http://172.16.54.96',
+        url: 'http://172.16.54.96/security/overview',
         login: {
             usernameSel: By.id('username'),
             passwordSel: By.id('password'),
@@ -146,6 +146,7 @@ const dashboards = [
             username: process.env.GRAYLOG_USER,
             password: process.env.GRAYLOG_PASS
         },
+        consentSel: By.name('.fvXdnR '),
         readyCheck: By.css('.sc-fSoaGE'),
         isVisibleInCarousel: true
     },
@@ -206,10 +207,11 @@ async function waitDomReady(driver, timeout = 15000) {
 
 async function clickConsentIfAny(driver) {
   const guesses = [
+    By.name('.fvXdnR '),
     By.name('.-primary'), // Sélecteur champ username
     By.id('banner_button'),
     By.css('button#accept, button#agree, button[aria-label*="accept"], button[aria-label*="agree"]'),
-    By.xpath("//button[contains(translate(.,'ACEPTÉRNDUI','aceptérndui'),'accepter') or contains(.,'I agree') or contains(.,'OK')]")
+    By.xpath("//button[contains(translate(.,'ACEPTÉRNDUI','aceptérndui'),'accepter') or contains(.,'I agree') or contains(.,'OK') or contains(.,'Close') or contains(.,'close')]")
   ];
   for (const sel of guesses) {
     try {
@@ -393,74 +395,6 @@ async function autoScroll(driver, durationMs) {
 }
 
 /** ========= SCRIPT PRINCIPAL ========= **/
-(async function main_v1() {
-  const options = new chrome.Options()
-    .setAcceptInsecureCerts(true)
-    .addArguments('--ignore-certificate-errors')
-    .addArguments('--allow-insecure-localhost')
-    .addArguments('--start-maximized')
-    .addArguments('--disable-infobars')
-    .addArguments('--disable-extensions')
-    .addArguments("--start-fullscreen");
-
-  const driver = await new Builder().forBrowser('chrome').setChromeOptions(options).build();
-
-  try {
-    console.log('Lancement WebDriver...');
-
-    const tabs = [];
-
-    // Ouvre le 1er dashboard dans l'onglet courant
-    await driver.get(dashboards[0].url);
-    await driver.sleep(5000); // attendre que la page soit bien chargée
-    await driver.executeScript('history.go(0)');
-    await ensureLoggedIn(driver, dashboards[0]);
-    tabs.push(await driver.getWindowHandle());
-
-
-    //await driver.manage().window().maximize();
-
-    // Ouvre les autres dashboards dans de nouveaux onglets
-    for (let i = 1; i < dashboards.length; i++) {
-      await driver.executeScript('window.open("about:blank","_blank");');
-      const handles = await driver.getAllWindowHandles();
-      const newTab = handles.find(h => !tabs.includes(h));
-      tabs.push(newTab);
-
-      await driver.switchTo().window(newTab);
-      await driver.get(dashboards[i].url);
-      await ensureLoggedIn(driver, dashboards[i]);
-
-    //    // Click sur le lien si défini
-    //     if (dashboards[i].linkId) {
-    //         await clickById(driver, dashboards[i].linkId);
-    //     }
-
-        if(dashboards[i].consentSel) {
-            await clickConsentIfAny(driver, dashboards[i].consentSel);
-        }
-    }
-
-    console.log(`Tous les dashboards sont ouverts et connectés.`);
-
-
-    // Carrousel dynamique
-    while (true) {
-      for (let i = 0; i < dashboards.length; i++) {
-        if (!dashboards[i].isVisibleInCarousel) continue;
-        await driver.switchTo().window(tabs[i]);
-        await ensureLoggedIn(driver, dashboards[i]);
-        console.log(`Dashboard affiché : ${dashboards[i].name}`);
-        await autoScroll(driver, DISPLAY_TIME); // scroll robuste
-      }
-    }
-  } catch (e) {
-    console.error('Erreur principale :', e);
-  } finally {
-    // laisse tourner pour le mur d’écrans
-    // await driver.quit();
-  }
-})();
 
 
 (async function main() {
